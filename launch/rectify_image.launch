@@ -1,11 +1,13 @@
 <?xml version="1.0"?>
 <launch>
 <arg name="ns" default="/"/>
-<arg name="image_topic" default="/image_raw" />
-<arg name="camera_info_topic" default="/camera/color/camera_info" />
+<arg name="image_topic" default="/camera/fisheye2/image_raw" />
+<arg name="rect_image_topic" default="/camera/fisheye2/image_rect" />
+<arg name="camera_info_topic" default="/camera/fisheye2/camera_info" />
 <group ns="$(arg ns)">
 	<node name="rectify_image" type="rectify_image" pkg="image_handler" output="screen" >
         <remap from="in_image_base_topic" to="$(arg image_topic)" />
+        <remap from="out_image_base_topic" to="$(arg rect_image_topic)" />
         <remap from="camera_info" to="$(arg camera_info_topic)" />
     </node>
 </group>

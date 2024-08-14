@@ -16,9 +16,6 @@ find_package(catkin REQUIRED COMPONENTS
   image_geometry
 )
 
-set(vision_opencv_DIR /home/usrg/catkin_ws/build/vision_opencv/)
-find_package(vision_opencv REQUIRED)
-
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
