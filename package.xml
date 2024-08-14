@@ -55,7 +55,6 @@
   <build_export_depend>sensor_msgs</build_export_depend>
   <build_export_depend>vision_msgs</build_export_depend>
   <build_export_depend>vision_opencv</build_export_depend>
-  <exec_depend>opencv</exec_depend>
   <exec_depend>vision_msgs</exec_depend>
   <exec_depend>vision_opencv</exec_depend>
   <depend>roscpp</depend>

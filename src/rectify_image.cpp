@@ -9,7 +9,6 @@
 #include <sensor_msgs/Image.h>
 #include <image_transport/image_transport.h>
 
-#include <vision_opencv/rectify_image.h>
 
 class RectifyImage
 {
