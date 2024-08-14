@@ -35,12 +35,14 @@ private:
 };
 
 RectifyImage::RectifyImage(ros::NodeHandle nh, ros::NodeHandle nhp)
-: nh_(nh), nhp_(nhp), it_(nh)
+: nh_(nh), nhp_(nhp), it_(nh), is_camera_model_set_(false)
 {
     it_sub_ = it_.subscribe("in_image_base_topic", 1, boost::bind(&RectifyImage::imageCallback, this, _1));
     // it_compressed_sub_ = compressed_image_transport::CompressedSubscriber(nh_);
     it_pub_ = it_.advertise("out_image_base_topic", 1);
     camera_info_sub_ = nh_.subscribe("camera_info", 1, &RectifyImage::cameraInfoCallback, this);
+
+    ROS_INFO("rectify_image node is initialized.");
 }
 
 RectifyImage::~RectifyImage()
@@ -54,6 +56,7 @@ void RectifyImage::cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& msg
         camera_info_ = *msg;
         camera_model_.fromCameraInfo(msg);
         is_camera_model_set_ = true;
+        ROS_INFO("camera_info is set.");
         return;
     }
 }
@@ -62,7 +65,7 @@ void RectifyImage::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
     if(!is_camera_model_set_)
     {
-        ROS_WARN_THROTTLE(5,"Camera model is not set yet.");
+        ROS_WARN_THROTTLE(5,"camera_info is not set yet.");
         return;
     }
     else
