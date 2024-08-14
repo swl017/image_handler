@@ -11,14 +11,16 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   vision_msgs
-  vision_opencv
   cv_bridge
   image_transport
+  image_geometry
 )
+
+set(vision_opencv_DIR /home/usrg/catkin_ws/build/vision_opencv/)
+find_package(vision_opencv REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-find_package(OpenCV REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -139,7 +141,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/image_handler_node.cpp)
+add_executable(rectify_image src/rectify_image.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -152,10 +154,9 @@ include_directories(
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-#   ${opencv_LIBRARIES}
-# )
+target_link_libraries(rectify_image
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
