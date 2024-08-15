@@ -11,7 +11,6 @@
 #include <sensor_msgs/CameraInfo.h>
 #include <image_transport/image_transport.h>
 #include <image_geometry/pinhole_camera_model.h>
-#include <compressed_image_transport/compressed_subscriber.h>
 #include <cv_bridge/cv_bridge.h>
 
 class RectifyImage
@@ -28,21 +27,33 @@ private:
     image_transport::ImageTransport it_;
     image_transport::Subscriber it_sub_;
     image_transport::Publisher it_pub_;
-    image_geometry::PinholeCameraModel camera_model_;
-    // compressed_image_transport::CompressedSubscriber it_compressed_sub_;
-    bool is_camera_model_set_;
+
     sensor_msgs::CameraInfo camera_info_;
+    image_geometry::PinholeCameraModel camera_model_;
+
+    bool is_camera_model_set_;
+    double rate_hz_, last_rect_time_;
+    bool use_compressed_image_;
 };
 
 RectifyImage::RectifyImage(ros::NodeHandle nh, ros::NodeHandle nhp)
 : nh_(nh), nhp_(nhp), it_(nh), is_camera_model_set_(false)
 {
+    rate_hz_ = nhp_.param<double>("rate_hz", 2.0);
+    if(rate_hz_ <= 0)
+    {
+        ROS_WARN("rate_hz is not set properly(%f hz). Set to 2.0", rate_hz_);
+        rate_hz_ = 2.0;
+    }
+    last_rect_time_ = ros::Time::now().toSec();
+
+    use_compressed_image_ = nhp_.param<bool>("use_compressed_image", false);
+    std::string hints = use_compressed_image_ ? "compressed" : "raw";
     it_sub_ = it_.subscribe("in_image_base_topic", 1, boost::bind(&RectifyImage::imageCallback, this, _1));
-    // it_compressed_sub_ = compressed_image_transport::CompressedSubscriber(nh_);
     it_pub_ = it_.advertise("out_image_base_topic", 1);
     camera_info_sub_ = nh_.subscribe("camera_info", 1, &RectifyImage::cameraInfoCallback, this);
 
-    ROS_INFO("rectify_image node is initialized.");
+    ROS_INFO("rectify_image node initialized.");
 }
 
 RectifyImage::~RectifyImage()
@@ -68,8 +79,13 @@ void RectifyImage::imageCallback(const sensor_msgs::ImageConstPtr& msg)
         ROS_WARN_THROTTLE(5,"camera_info is not set yet.");
         return;
     }
+    else if(ros::Time::now().toSec() - last_rect_time_ < 1.0/rate_hz_)
+    {
+        return;
+    }
     else
     {
+        ROS_INFO_ONCE("Rectifying");
         cv_bridge::CvImagePtr cv_ptr;
         try
         {
@@ -88,6 +104,8 @@ void RectifyImage::imageCallback(const sensor_msgs::ImageConstPtr& msg)
         cv_image.encoding = sensor_msgs::image_encodings::BGR8;
         cv_image.image = image_rect;
         it_pub_.publish(cv_image.toImageMsg());
+        ROS_INFO("Publishing rectified image.");
+        last_rect_time_ = ros::Time::now().toSec();
     }
 }
 
