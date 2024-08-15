@@ -103,7 +103,8 @@ void RectifyImage::imageCallback(const sensor_msgs::ImageConstPtr& msg)
         cv_image.header = msg->header;
         cv_image.encoding = sensor_msgs::image_encodings::BGR8;
         cv_image.image = image_rect;
-        it_pub_.publish(cv_image.toImageMsg());
+        auto cv_image_msg = cv_image.toImageMsg();
+        it_pub_.publish(cv_image_msg); // OpenCV error occurs here, but the image is published.
         ROS_INFO("Publishing rectified image.");
         last_rect_time_ = ros::Time::now().toSec();
     }
